@@ -8,7 +8,7 @@ type CardProps = {
 
 export default function Card(props: CardProps) {
 
-  const { children, direction = "landscape" } = props;
+  const { direction = "landscape" } = props;
 
   return (
     <div
@@ -21,7 +21,7 @@ export default function Card(props: CardProps) {
         "rounded-[3mm]",
       ].join(" ")}
     >
-      カード
+      {props.children || "カード"}
     </div>
   )
 }
