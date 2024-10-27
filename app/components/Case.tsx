@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Card from './Card';
 
 type CaseProps = {
@@ -13,7 +13,80 @@ export default function Case(props: CaseProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const cardPosition = useRef({ x: 0, y: 0 });
 
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const { direction = "landscape" } = props;
+
+  const [isHitLeftOrRight, setIsHitLeftOrRight] = useState(false);
+  const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
+
+  const playSound = useCallback(() => {
+
+    const fn = async () => {
+      if (!audioRef.current) {
+        return;
+      }
+
+      try {
+        // NOTE: Safariでは、`controls`によって1度でも再生されるとplay()が使えるようになる
+        audioRef.current.currentTime = 0;
+        await audioRef.current.play();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fn();
+
+  }, [])
+
+  useEffect(() => {
+
+    let playing = false;
+
+    (() => {
+      if (!isHitLeftOrRight) {
+        playing = false;
+        return;
+      }
+
+      if (playing) {
+        return;
+      }
+
+      playing = true;
+      playSound();
+
+    })();
+
+    return () => {
+      playing = false;
+    }
+  }, [isHitLeftOrRight]);
+
+  useEffect(() => {
+
+    let playing = false;
+
+    (() => {
+      if (!isHitTopOrBottom) {
+        playing = false;
+        return;
+      }
+
+      if (playing) {
+        return;
+      }
+
+      playing = true;
+      playSound();
+
+    })();
+
+    return () => {
+      playing = false;
+    }
+  }, [isHitTopOrBottom]);
 
   useEffect(() => {
     // クリック、タッチによるドラッグを実装する
@@ -63,21 +136,31 @@ export default function Case(props: CaseProps) {
       const caseRight = caseWidth;
       const caseBottom = caseHeight;
 
+      let hitLeftOrRight = false;
+      let hitTopOrBottom = false;
+
       if (cardLeft < caseLeft) {
         cardElement.style.left = `${caseLeft}px`;
+        hitLeftOrRight = true;
       } else if (cardRight > caseRight) {
         cardElement.style.left = `${caseRight - cardWidth}px`;
+        hitLeftOrRight = true;
       } else {
         cardElement.style.left = `${cardLeft}px`;
       }
 
       if (cardTop < caseTop) {
         cardElement.style.top = `${caseTop}px`;
+        hitTopOrBottom = true;
       } else if (cardBottom > caseBottom) {
         cardElement.style.top = `${caseBottom - cardHeight}px`;
+        hitTopOrBottom = true;
       } else {
         cardElement.style.top = `${cardTop}px`;
       }
+
+      setIsHitLeftOrRight(hitLeftOrRight);
+      setIsHitTopOrBottom(hitTopOrBottom);
     }
 
     const dragEnd = () => {
@@ -136,23 +219,40 @@ export default function Case(props: CaseProps) {
 
   }, []);
 
+  const borderColor = useMemo(() => {
+    if (isHitLeftOrRight && isHitTopOrBottom) {
+      return "border-red-500";
+    } else if (isHitLeftOrRight) {
+      return "border-blue-500";
+    } else if (isHitTopOrBottom) {
+      return "border-green-500";
+    } else {
+      return "border-gray-500";
+    }
+  }, [isHitLeftOrRight, isHitTopOrBottom]);
+
   return (
     <div
       ref={caseRef}
       className={[
         "case",
         "border",
-        "border-blue-500",
+        borderColor,
         "rounded-[3mm]",
         "relative",
         direction === "landscape" ? "landscape" : "portrait",
       ].join(" ")}
     >
       <div ref={cardRef} className="absolute">
-        <Card direction={props.direction}>
-
-        </Card>
+        <Card direction={props.direction} />
       </div>
+
+      <audio
+        preload="auto"
+        controls
+        ref={audioRef}
+        src="/sounds/hit.mp3"
+      />
     </div>
   )
 }
