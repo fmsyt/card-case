@@ -5,6 +5,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --trump-width: 58mm;
+  --trump-height: 89mm;
+  --trump-round: 3mm;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,8 +24,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer components {
+  .card {
+    width: var(--trump-width);
+    height: var(--trump-height);
+    border-radius: var(--trump-round);
+    background: var(--foreground);
+    color: var(--background);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    &.landscape {
+      width: var(--trump-height);
+      height: var(--trump-width);
+    }
+    &.portrait {
+      width: var(--trump-width);
+      height: var(--trump-height);
+    }
+  }
+
+  .case {
+    --case-offset: 5mm;
+
+    &.landscape {
+      width: calc(var(--trump-height) + var(--case-offset));
+      height: calc(var(--trump-width) + var(--case-offset));
+    }
+    &.portrait {
+      width: calc(var(--trump-width) + var(--case-offset));
+      height: calc(var(--trump-height) + var(--case-offset));
+    }
   }
 }
