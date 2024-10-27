@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  headers: async () => ([
+  headers: () => Promise.resolve([
     {
       source: '/(.*)',
       headers: [

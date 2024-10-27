@@ -1,13 +1,12 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type CardProps = {
   children?: ReactNode;
   direction?: "landscape" | "portrait";
   ref?: React.Ref<HTMLDivElement>;
-}
+};
 
 export default function Card(props: CardProps) {
-
   const { direction = "landscape" } = props;
 
   return (
@@ -23,5 +22,5 @@ export default function Card(props: CardProps) {
     >
       {props.children || "カード"}
     </div>
-  )
+  );
 }

@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Card from './Card';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Card from "./Card";
 
 type CaseProps = {
   direction?: "landscape" | "portrait";
-}
+};
 
 export default function Case(props: CaseProps) {
-
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardPosition = useRef({ x: 0, y: 0 });
@@ -21,7 +20,6 @@ export default function Case(props: CaseProps) {
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
   const playSound = useCallback(() => {
-
     const fn = async () => {
       if (!audioRef.current) {
         return;
@@ -34,14 +32,12 @@ export default function Case(props: CaseProps) {
       } catch (error) {
         console.error(error);
       }
-    }
+    };
 
     fn();
-
-  }, [])
+  }, []);
 
   useEffect(() => {
-
     let playing = false;
 
     (() => {
@@ -56,16 +52,14 @@ export default function Case(props: CaseProps) {
 
       playing = true;
       playSound();
-
     })();
 
     return () => {
       playing = false;
-    }
-  }, [isHitLeftOrRight]);
+    };
+  }, [isHitLeftOrRight, playSound]);
 
   useEffect(() => {
-
     let playing = false;
 
     (() => {
@@ -80,13 +74,12 @@ export default function Case(props: CaseProps) {
 
       playing = true;
       playSound();
-
     })();
 
     return () => {
       playing = false;
-    }
-  }, [isHitTopOrBottom]);
+    };
+  }, [isHitTopOrBottom, playSound]);
 
   useEffect(() => {
     // クリック、タッチによるドラッグを実装する
@@ -110,8 +103,8 @@ export default function Case(props: CaseProps) {
       cardPosition.current = {
         x: offsetLeft,
         y: offsetTop,
-      }
-    }
+      };
+    };
 
     const dragMove = (clientX: number, clientY: number) => {
       if (!isDragging) {
@@ -161,39 +154,48 @@ export default function Case(props: CaseProps) {
 
       setIsHitLeftOrRight(hitLeftOrRight);
       setIsHitTopOrBottom(hitTopOrBottom);
-    }
+    };
 
     const dragEnd = () => {
       isDragging = false;
-    }
+    };
 
     cardElement.addEventListener("mousedown", (event) => {
-      dragStart(event.clientY - cardElement.offsetTop, event.clientX - cardElement.offsetLeft);
-    })
+      dragStart(
+        event.clientY - cardElement.offsetTop,
+        event.clientX - cardElement.offsetLeft,
+      );
+    });
 
     cardElement.addEventListener("touchstart", (event) => {
-      dragStart(event.touches[0].clientY - cardElement.offsetTop, event.touches[0].clientX - cardElement.offsetLeft);
-    })
+      dragStart(
+        event.touches[0].clientY - cardElement.offsetTop,
+        event.touches[0].clientX - cardElement.offsetLeft,
+      );
+    });
 
     window.addEventListener("mousemove", (event) => {
       dragMove(event.clientX, event.clientY);
-    })
+    });
 
     window.addEventListener("touchmove", (event) => {
       dragMove(event.touches[0].clientX, event.touches[0].clientY);
-    })
+    });
 
     window.addEventListener("mouseup", () => {
       dragEnd();
-    })
+    });
 
     window.addEventListener("touchend", () => {
       dragEnd();
-    })
+    });
 
     return () => {
       cardElement.removeEventListener("mousedown", (event) => {
-        dragStart(event.clientY - cardElement.offsetTop, event.clientX - cardElement.offsetLeft);
+        dragStart(
+          event.clientY - cardElement.offsetTop,
+          event.clientX - cardElement.offsetLeft,
+        );
       });
 
       window.removeEventListener("mousemove", (event) => {
@@ -205,7 +207,10 @@ export default function Case(props: CaseProps) {
       });
 
       cardElement.removeEventListener("touchstart", (event) => {
-        dragStart(event.touches[0].clientY - cardElement.offsetTop, event.touches[0].clientX - cardElement.offsetLeft);
+        dragStart(
+          event.touches[0].clientY - cardElement.offsetTop,
+          event.touches[0].clientX - cardElement.offsetLeft,
+        );
       });
 
       window.removeEventListener("touchmove", (event) => {
@@ -215,20 +220,20 @@ export default function Case(props: CaseProps) {
       window.removeEventListener("touchend", () => {
         dragEnd();
       });
-    }
-
+    };
   }, []);
 
   const borderColor = useMemo(() => {
     if (isHitLeftOrRight && isHitTopOrBottom) {
       return "border-red-500";
-    } else if (isHitLeftOrRight) {
-      return "border-blue-500";
-    } else if (isHitTopOrBottom) {
-      return "border-green-500";
-    } else {
-      return "border-gray-500";
     }
+    if (isHitLeftOrRight) {
+      return "border-blue-500";
+    }
+    if (isHitTopOrBottom) {
+      return "border-green-500";
+    }
+    return "border-gray-500";
   }, [isHitLeftOrRight, isHitTopOrBottom]);
 
   return (
@@ -247,12 +252,9 @@ export default function Case(props: CaseProps) {
         <Card direction={props.direction} />
       </div>
 
-      <audio
-        preload="auto"
-        controls
-        ref={audioRef}
-        src="/sounds/hit.mp3"
-      />
+      <audio preload="auto" controls ref={audioRef} src="/sounds/hit.mp3">
+        <track kind="captions" />
+      </audio>
     </div>
-  )
+  );
 }
