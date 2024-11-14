@@ -18,6 +18,7 @@ export default function Card(props: CardProps) {
         "border",
         "border-red-500",
         "rounded-[3mm]",
+        "selection-none",
       ].join(" ")}
     >
       {props.children || "カード"}
