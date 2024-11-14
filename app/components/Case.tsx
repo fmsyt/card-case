@@ -19,6 +19,8 @@ export default function Case(props: CaseProps) {
   const [isHitLeftOrRight, setIsHitLeftOrRight] = useState(false);
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
+  const [activated, setActivated] = useState(false);
+
   const playSound = useCallback(() => {
     const fn = async () => {
       if (!audioRef.current) {
@@ -237,22 +239,47 @@ export default function Case(props: CaseProps) {
   }, [isHitLeftOrRight, isHitTopOrBottom]);
 
   return (
-    <div
-      ref={caseRef}
-      className={[
-        "case",
-        "border",
-        borderColor,
-        "rounded-[3mm]",
-        "relative",
-        direction === "landscape" ? "landscape" : "portrait",
-      ].join(" ")}
-    >
-      <div ref={cardRef} className="absolute">
-        <Card direction={props.direction} />
+    <div className="flex flex-col items-center">
+      <div
+        ref={caseRef}
+        className={[
+          "case",
+          "border",
+          borderColor,
+          "rounded-[3mm]",
+          "relative",
+          direction === "landscape" ? "landscape" : "portrait",
+          !activated && "hidden",
+        ].join(" ")}
+      >
+        <div
+          ref={cardRef}
+          className="absolute"
+        >
+          <Card direction={props.direction} />
+        </div>
       </div>
 
-      <audio preload="auto" controls ref={audioRef} src="/sounds/hit.mp3">
+      {!activated && (
+        <button
+          type="button"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => {
+            audioRef.current?.play();
+            setActivated(true);
+          }}
+        >
+          クリックで開始
+        </button>
+      )}
+
+      <audio
+        preload="auto"
+        controls
+        ref={audioRef}
+        src="/sounds/hit.mp3"
+        className="hidden"
+      >
         <track kind="captions" />
       </audio>
     </div>
