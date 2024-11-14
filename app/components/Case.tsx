@@ -12,8 +12,6 @@ export default function Case(props: CaseProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const cardPosition = useRef({ x: 0, y: 0 });
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-
   const { direction = "landscape" } = props;
 
   const [isHitLeftOrRight, setIsHitLeftOrRight] = useState(false);
@@ -21,18 +19,64 @@ export default function Case(props: CaseProps) {
 
   const [activated, setActivated] = useState(false);
 
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBufferRef = useRef<AudioBuffer | null>(null);
+
+  const initAudio = useCallback(async () => {
+
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+    }
+
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const response = await fetch("/sounds/hit.mp3");
+    const arrayBuffer = await response.arrayBuffer();
+    audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
+
+  }, []);
+
+  useEffect(() => {
+    initAudio();
+
+    const handleDeviceChange = () => {
+      initAudio();
+    };
+
+    if (navigator.mediaDevices) {
+      if (navigator.mediaDevices.addEventListener) {
+        navigator.mediaDevices.addEventListener("devicechange", handleDeviceChange);
+      } else {
+        navigator.mediaDevices.ondevicechange = handleDeviceChange;
+      }
+    }
+
+    return () => {
+      if (navigator.mediaDevices) {
+        if (navigator.mediaDevices.removeEventListener) {
+          navigator.mediaDevices.removeEventListener("devicechange", handleDeviceChange);
+        } else {
+          navigator.mediaDevices.ondevicechange = null;
+        }
+      }
+    };
+  }, [initAudio]);
+
   const playSound = useCallback(() => {
+
     const fn = async () => {
-      if (!audioRef.current) {
+      if (!audioContextRef.current || !audioBufferRef.current) {
         return;
       }
 
       try {
-        // NOTE: Safariでは、`controls`によって1度でも再生されるとplay()が使えるようになる
-        audioRef.current.currentTime = 0;
-        await audioRef.current.play();
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = audioBufferRef.current;
+        source.connect(audioContextRef.current.destination);
+        source.start(0);
       } catch (error) {
-        console.error(error);
+        const message = error instanceof Error ? error.message : "Unknown error";
+        alert(message);
       }
     };
 
@@ -265,23 +309,16 @@ export default function Case(props: CaseProps) {
           type="button"
           className="bg-blue-500 text-white px-4 py-2 rounded"
           onClick={() => {
-            audioRef.current?.play();
+            if (audioContextRef.current?.state === "suspended") {
+              audioContextRef.current.resume();
+            }
+            playSound();
             setActivated(true);
           }}
         >
           クリックで開始
         </button>
       )}
-
-      <audio
-        preload="auto"
-        controls
-        ref={audioRef}
-        src="/sounds/hit.mp3"
-        className="hidden"
-      >
-        <track kind="captions" />
-      </audio>
     </div>
   );
 }
