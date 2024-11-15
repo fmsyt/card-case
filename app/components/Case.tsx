@@ -18,7 +18,7 @@ export default function Case(props: CaseProps) {
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
   const [activated, setActivated] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const volumeRef = useRef(1);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -78,7 +78,7 @@ export default function Case(props: CaseProps) {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = audioBufferRef.current;
         const gainNode = audioContextRef.current.createGain();
-        gainNode.gain.value = volume;
+        gainNode.gain.value = volumeRef.current;
         source.connect(gainNode).connect(audioContextRef.current.destination);
         source.start(0);
       } catch (error) {
@@ -88,7 +88,7 @@ export default function Case(props: CaseProps) {
     };
 
     fn();
-  }, [volume]);
+  }, []);
 
   useEffect(() => {
     (() => {
@@ -313,8 +313,8 @@ export default function Case(props: CaseProps) {
           min="0"
           max="1"
           step="0.01"
-          value={volume}
-          onChange={(e) => setVolume(Number(e.target.value))}
+          defaultValue={volumeRef.current}
+          onChange={(e) => { volumeRef.current = Number(e.target.value); }}
           className="mt-4"
         />
       )}
