@@ -7,12 +7,11 @@ type CaseProps = {
   direction?: "landscape" | "portrait";
 };
 
-const MAX_VOLUME_DISTANCE = 100;
-
 export default function Case(props: CaseProps) {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const cardPosition = useRef({ x: 0, y: 0 });
+
+  const initialCardPosition = useRef({ left: 0, top: 0 });
 
   const { direction = "landscape" } = props;
 
@@ -21,7 +20,6 @@ export default function Case(props: CaseProps) {
 
   const [activated, setActivated] = useState(false);
   const volumeRef = useRef(0.5);
-  const hitVolumeRef = useRef(0); // 追加
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -82,8 +80,7 @@ export default function Case(props: CaseProps) {
         source.buffer = audioBufferRef.current;
 
         const gainNode = audioContextRef.current.createGain();
-        const gainValue = volumeRef.current * hitVolumeRef.current;
-        gainNode.gain.value = gainValue;
+        gainNode.gain.value = volumeRef.current;
 
         source.connect(gainNode).connect(audioContextRef.current.destination);
         source.start(0);
@@ -160,9 +157,9 @@ export default function Case(props: CaseProps) {
 
     const dragStart = (offsetTop: number, offsetLeft: number) => {
       isDragging = true;
-      cardPosition.current = {
-        x: offsetLeft,
-        y: offsetTop,
+      initialCardPosition.current = {
+        left: offsetLeft,
+        top: offsetTop,
       };
     };
 
@@ -177,14 +174,14 @@ export default function Case(props: CaseProps) {
       const caseWidth = caseElement.offsetWidth;
       const caseHeight = caseElement.offsetHeight;
 
-      const cardLeft = clientX - cardPosition.current.x;
-      const cardTop = clientY - cardPosition.current.y;
+      const cardLeftExpected = clientX - initialCardPosition.current.left;
+      const cardTopExpected = clientY - initialCardPosition.current.top;
 
-      const cardRight = cardLeft + cardWidth;
-      const cardBottom = cardTop + cardHeight;
+      let cardLeft = cardLeftExpected;
+      let cardTop = cardTopExpected;
 
-      const caseLeft = 0;
-      const caseTop = 0;
+      const cardRight = cardLeftExpected + cardWidth;
+      const cardBottom = cardTopExpected + cardHeight;
 
       const caseRight = caseWidth;
       const caseBottom = caseHeight;
@@ -192,50 +189,27 @@ export default function Case(props: CaseProps) {
       let hitLeftOrRight = false;
       let hitTopOrBottom = false;
 
-      if (cardLeft < caseLeft) {
-        cardElement.style.left = `${caseLeft}px`;
+      if (cardLeftExpected < 0) {
+        cardLeft = 0;
         hitLeftOrRight = true;
       } else if (cardRight > caseRight) {
-        cardElement.style.left = `${caseRight - cardWidth}px`;
+        cardLeft = caseRight - cardWidth;
         hitLeftOrRight = true;
-      } else {
-        cardElement.style.left = `${cardLeft}px`;
       }
 
-      if (cardTop < caseTop) {
-        cardElement.style.top = `${caseTop}px`;
+      if (cardTopExpected < 0) {
+        cardTop = 0;
         hitTopOrBottom = true;
       } else if (cardBottom > caseBottom) {
-        cardElement.style.top = `${caseBottom - cardHeight}px`;
+        cardTop = caseBottom - cardHeight;
         hitTopOrBottom = true;
-      } else {
-        cardElement.style.top = `${cardTop}px`;
       }
+
+      cardElement.style.left = `${cardLeft}px`;
+      cardElement.style.top = `${cardTop}px`;
 
       setIsHitLeftOrRight(hitLeftOrRight);
       setIsHitTopOrBottom(hitTopOrBottom);
-
-      let distance = Math.sqrt((cardLeft - cardPosition.current.x) ** 2 + (cardTop - cardPosition.current.y) ** 2);
-      if (distance > MAX_VOLUME_DISTANCE) {
-        distance = MAX_VOLUME_DISTANCE;
-      }
-
-      // E = mv^2 / 2
-      // Lp = 20 log10(E / E0)
-
-
-      const m = 1;
-      const v = distance;
-
-      const e = m * v ** 2 / 2;
-      const e0 = 1;
-
-      const lp = 20 * Math.log10(e / e0);
-
-      hitVolumeRef.current = lp / 100;
-
-
-      // hitVolumeRef.current = distance / MAX_VOLUME_DISTANCE;
     };
 
     const dragEnd = () => {
