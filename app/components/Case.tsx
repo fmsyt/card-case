@@ -24,6 +24,8 @@ export default function Case(props: CaseProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
 
+  const playingRef = useRef(false);
+
   const initAudio = useCallback(async () => {
 
     if (audioContextRef.current) {
@@ -86,46 +88,42 @@ export default function Case(props: CaseProps) {
   }, []);
 
   useEffect(() => {
-    let playing = false;
-
     (() => {
       if (!isHitLeftOrRight) {
-        playing = false;
+        playingRef.current = false;
         return;
       }
 
-      if (playing) {
+      if (playingRef.current) {
         return;
       }
 
-      playing = true;
+      playingRef.current = true;
       playSound();
     })();
 
     return () => {
-      playing = false;
+      playingRef.current = false;
     };
   }, [isHitLeftOrRight, playSound]);
 
   useEffect(() => {
-    let playing = false;
-
     (() => {
       if (!isHitTopOrBottom) {
-        playing = false;
+        playingRef.current = false;
         return;
       }
 
-      if (playing) {
+      if (playingRef.current) {
         return;
       }
 
-      playing = true;
+      playingRef.current = true;
       playSound();
     })();
 
     return () => {
-      playing = false;
+      playingRef.current = false;
     };
   }, [isHitTopOrBottom, playSound]);
 
