@@ -18,6 +18,7 @@ export default function Case(props: CaseProps) {
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
   const [activated, setActivated] = useState(false);
+  const [volume, setVolume] = useState(1);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -76,7 +77,9 @@ export default function Case(props: CaseProps) {
       try {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = audioBufferRef.current;
-        source.connect(audioContextRef.current.destination);
+        const gainNode = audioContextRef.current.createGain();
+        gainNode.gain.value = volume;
+        source.connect(gainNode).connect(audioContextRef.current.destination);
         source.start(0);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
@@ -85,7 +88,7 @@ export default function Case(props: CaseProps) {
     };
 
     fn();
-  }, []);
+  }, [volume]);
 
   useEffect(() => {
     (() => {
@@ -303,6 +306,18 @@ export default function Case(props: CaseProps) {
           <Card direction={props.direction} />
         </div>
       </div>
+
+      {activated && (
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={volume}
+          onChange={(e) => setVolume(Number(e.target.value))}
+          className="mt-4"
+        />
+      )}
 
       {!activated && (
         <>
