@@ -29,17 +29,19 @@ export default function Case(props: CaseProps) {
   const playingRef = useRef(false);
 
   const initAudio = useCallback(async () => {
-
     if (audioContextRef.current) {
       audioContextRef.current.close();
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = new (
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext
+    )();
     const response = await fetch("/sounds/hit.mp3");
     const arrayBuffer = await response.arrayBuffer();
-    audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
-
+    audioBufferRef.current =
+      await audioContextRef.current.decodeAudioData(arrayBuffer);
   }, []);
 
   useEffect(() => {
@@ -51,7 +53,10 @@ export default function Case(props: CaseProps) {
 
     if (navigator.mediaDevices) {
       if (navigator.mediaDevices.addEventListener) {
-        navigator.mediaDevices.addEventListener("devicechange", handleDeviceChange);
+        navigator.mediaDevices.addEventListener(
+          "devicechange",
+          handleDeviceChange,
+        );
       } else {
         navigator.mediaDevices.ondevicechange = handleDeviceChange;
       }
@@ -60,7 +65,10 @@ export default function Case(props: CaseProps) {
     return () => {
       if (navigator.mediaDevices) {
         if (navigator.mediaDevices.removeEventListener) {
-          navigator.mediaDevices.removeEventListener("devicechange", handleDeviceChange);
+          navigator.mediaDevices.removeEventListener(
+            "devicechange",
+            handleDeviceChange,
+          );
         } else {
           navigator.mediaDevices.ondevicechange = null;
         }
@@ -69,30 +77,23 @@ export default function Case(props: CaseProps) {
   }, [initAudio]);
 
   const playSound = useCallback(() => {
-
     const fn = async () => {
       if (!audioContextRef.current || !audioBufferRef.current) {
         return;
       }
 
-      try {
-        const source = audioContextRef.current.createBufferSource();
-        source.buffer = audioBufferRef.current;
+      const source = audioContextRef.current.createBufferSource();
+      source.buffer = audioBufferRef.current;
 
-        const gainNode = audioContextRef.current.createGain();
-        gainNode.gain.value = volumeRef.current;
+      const gainNode = audioContextRef.current.createGain();
+      gainNode.gain.value = volumeRef.current;
 
-        source.connect(gainNode).connect(audioContextRef.current.destination);
-        source.start(0);
+      source.connect(gainNode).connect(audioContextRef.current.destination);
+      source.start(0);
 
-        source.onended = () => {
-          playingRef.current = false;
-        };
-
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
-        alert(message);
-      }
+      source.onended = () => {
+        playingRef.current = false;
+      };
     };
 
     fn();
@@ -306,10 +307,7 @@ export default function Case(props: CaseProps) {
           !activated && "hidden",
         ].join(" ")}
       >
-        <div
-          ref={cardRef}
-          className="absolute"
-        >
+        <div ref={cardRef} className="absolute">
           <Card direction={props.direction} />
         </div>
       </div>
@@ -321,7 +319,9 @@ export default function Case(props: CaseProps) {
           max="1"
           step="0.01"
           defaultValue={volumeRef.current}
-          onChange={(e) => { volumeRef.current = Number(e.target.value); }}
+          onChange={(e) => {
+            volumeRef.current = Number(e.target.value);
+          }}
           className="mt-4"
         />
       )}
