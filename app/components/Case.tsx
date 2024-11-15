@@ -7,6 +7,8 @@ type CaseProps = {
   direction?: "landscape" | "portrait";
 };
 
+const MAX_VOLUME_DISTANCE = 100;
+
 export default function Case(props: CaseProps) {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -18,7 +20,8 @@ export default function Case(props: CaseProps) {
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
   const [activated, setActivated] = useState(false);
-  const volumeRef = useRef(1);
+  const volumeRef = useRef(0.5);
+  const hitVolumeRef = useRef(0); // 追加
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -77,10 +80,18 @@ export default function Case(props: CaseProps) {
       try {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = audioBufferRef.current;
+
         const gainNode = audioContextRef.current.createGain();
-        gainNode.gain.value = volumeRef.current;
+        const gainValue = volumeRef.current * hitVolumeRef.current;
+        gainNode.gain.value = gainValue;
+
         source.connect(gainNode).connect(audioContextRef.current.destination);
         source.start(0);
+
+        source.onended = () => {
+          playingRef.current = false;
+        };
+
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         alert(message);
@@ -203,6 +214,28 @@ export default function Case(props: CaseProps) {
 
       setIsHitLeftOrRight(hitLeftOrRight);
       setIsHitTopOrBottom(hitTopOrBottom);
+
+      let distance = Math.sqrt((cardLeft - cardPosition.current.x) ** 2 + (cardTop - cardPosition.current.y) ** 2);
+      if (distance > MAX_VOLUME_DISTANCE) {
+        distance = MAX_VOLUME_DISTANCE;
+      }
+
+      // E = mv^2 / 2
+      // Lp = 20 log10(E / E0)
+
+
+      const m = 1;
+      const v = distance;
+
+      const e = m * v ** 2 / 2;
+      const e0 = 1;
+
+      const lp = 20 * Math.log10(e / e0);
+
+      hitVolumeRef.current = lp / 100;
+
+
+      // hitVolumeRef.current = distance / MAX_VOLUME_DISTANCE;
     };
 
     const dragEnd = () => {
