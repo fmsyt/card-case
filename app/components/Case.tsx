@@ -19,6 +19,8 @@ export default function Case(props: CaseProps) {
 
   const [activated, setActivated] = useState(false);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
 
@@ -305,20 +307,31 @@ export default function Case(props: CaseProps) {
       </div>
 
       {!activated && (
-        <button
-          type="button"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={() => {
-            if (audioContextRef.current?.state === "suspended") {
-              audioContextRef.current.resume();
-            }
-            playSound();
-            setActivated(true);
-          }}
-        >
-          クリックで開始
-        </button>
+        <>
+          <button
+            type="button"
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={() => {
+              if (audioContextRef.current?.state === "suspended") {
+                audioContextRef.current.resume();
+              }
+              audioRef.current?.play();
+              setActivated(true);
+            }}
+          >
+            クリックで開始
+          </button>
+
+          <p className="text-sm text-gray-500 mt-4">
+            このページは、音が出ます。音量にご注意ください。
+          </p>
+        </>
       )}
+
+      <audio ref={audioRef}>
+        <source src="/sounds/hit.mp3" type="audio/mpeg" />
+        <track kind="captions" />
+      </audio>
     </div>
   );
 }
