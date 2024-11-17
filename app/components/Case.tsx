@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import SoundContext from "../SoundContext";
+import SoundProvider from "../SoundProvider";
 import Card from "./Card";
 
 type CaseProps = {
@@ -8,12 +10,22 @@ type CaseProps = {
 };
 
 export default function Case(props: CaseProps) {
+  return (
+    <SoundProvider>
+      <CaseInner {...props} />
+    </SoundProvider>
+  );
+}
+
+function CaseInner(props: CaseProps) {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
 
   const { direction = "landscape" } = props;
+
+  const { initAudio, play } = useContext(SoundContext);
 
   const [isHitLeftOrRight, setIsHitLeftOrRight] = useState(false);
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
@@ -23,26 +35,7 @@ export default function Case(props: CaseProps) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioBufferRef = useRef<AudioBuffer | null>(null);
-
   const playingRef = useRef(false);
-
-  const initAudio = useCallback(async () => {
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
-
-    audioContextRef.current = new (
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext
-    )();
-    const response = await fetch("/sounds/hit.mp3");
-    const arrayBuffer = await response.arrayBuffer();
-    audioBufferRef.current =
-      await audioContextRef.current.decodeAudioData(arrayBuffer);
-  }, []);
 
   useEffect(() => {
     initAudio();
@@ -76,29 +69,6 @@ export default function Case(props: CaseProps) {
     };
   }, [initAudio]);
 
-  const playSound = useCallback(() => {
-    const fn = async () => {
-      if (!audioContextRef.current || !audioBufferRef.current) {
-        return;
-      }
-
-      const source = audioContextRef.current.createBufferSource();
-      source.buffer = audioBufferRef.current;
-
-      const gainNode = audioContextRef.current.createGain();
-      gainNode.gain.value = volumeRef.current;
-
-      source.connect(gainNode).connect(audioContextRef.current.destination);
-      source.start(0);
-
-      source.onended = () => {
-        playingRef.current = false;
-      };
-    };
-
-    fn();
-  }, []);
-
   useEffect(() => {
     (() => {
       if (!isHitLeftOrRight) {
@@ -111,13 +81,13 @@ export default function Case(props: CaseProps) {
       }
 
       playingRef.current = true;
-      playSound();
+      play();
     })();
 
     return () => {
       playingRef.current = false;
     };
-  }, [isHitLeftOrRight, playSound]);
+  }, [isHitLeftOrRight, play]);
 
   useEffect(() => {
     (() => {
@@ -131,13 +101,13 @@ export default function Case(props: CaseProps) {
       }
 
       playingRef.current = true;
-      playSound();
+      play();
     })();
 
     return () => {
       playingRef.current = false;
     };
-  }, [isHitTopOrBottom, playSound]);
+  }, [isHitTopOrBottom, play]);
 
   useEffect(() => {
     // クリック、タッチによるドラッグを実装する
@@ -332,9 +302,6 @@ export default function Case(props: CaseProps) {
             type="button"
             className="bg-blue-500 text-white px-4 py-2 rounded"
             onClick={() => {
-              if (audioContextRef.current?.state === "suspended") {
-                audioContextRef.current.resume();
-              }
               audioRef.current?.play();
               setActivated(true);
             }}
