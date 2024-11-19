@@ -1,6 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import SoundContext from "../SoundContext";
 import SoundProvider from "../SoundProvider";
 import Card from "./Card";
@@ -20,6 +27,27 @@ export default function Case(props: CaseProps) {
 function CaseInner(props: CaseProps) {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const inputImageRef = useRef<HTMLInputElement>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+
+  const handleImageChange = useCallback(() => {
+    if (!inputImageRef.current) {
+      return;
+    }
+
+    const file = inputImageRef.current.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImageBase64(event.target?.result as string);
+    };
+
+    reader.readAsDataURL(file);
+  }, []);
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
 
@@ -263,6 +291,10 @@ function CaseInner(props: CaseProps) {
     return "border-gray-500";
   }, [isHitLeftOrRight, isHitTopOrBottom]);
 
+  const handleContextMenu = useCallback((event: React.MouseEvent) => {
+    inputImageRef.current?.click();
+  }, []);
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -277,8 +309,13 @@ function CaseInner(props: CaseProps) {
           !activated && "hidden",
         ].join(" ")}
       >
-        <div ref={cardRef} className="absolute">
-          <Card direction={props.direction} />
+        <div
+          ref={cardRef}
+          className="absolute"
+          onContextMenu={handleContextMenu}
+          onDoubleClick={handleContextMenu}
+        >
+          <Card direction={props.direction} imageBase64={imageBase64} />
         </div>
       </div>
 
@@ -319,6 +356,14 @@ function CaseInner(props: CaseProps) {
         <source src="/sounds/hit.mp3" type="audio/mpeg" />
         <track kind="captions" />
       </audio>
+
+      <input
+        ref={inputImageRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageChange}
+      />
     </div>
   );
 }
