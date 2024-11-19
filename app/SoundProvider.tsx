@@ -63,10 +63,11 @@ export default function SoundProvider(props: AudioProviderProps) {
 
     const source = audioContextRef.current.createBufferSource();
     source.buffer = audioBufferRef.current;
-    source.connect(audioContextRef.current.destination);
 
     const gainNode = audioContextRef.current.createGain();
-    gainNode.gain.value = volume;
+
+    // NOTE: 人間の聴覚は対数的な感じ方をするので、音量を対数的に変更する
+    gainNode.gain.value = Math.log10(volume + 1);
 
     source.connect(gainNode);
     gainNode.connect(audioContextRef.current.destination);
