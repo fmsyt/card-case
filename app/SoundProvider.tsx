@@ -1,6 +1,10 @@
 import { type ReactNode, useCallback, useRef, useState } from "react";
 import SoundContext from "./SoundContext";
-import type { SoundContextValue, WindowWithAudioContext } from "./types";
+import type {
+  playParams,
+  SoundContextValue,
+  WindowWithAudioContext,
+} from "./types";
 
 type AudioProviderProps = {
   children: ReactNode;
@@ -50,14 +54,22 @@ export default function SoundProvider(props: AudioProviderProps) {
     fetchSound();
   }, []);
 
-  const play = useCallback(() => {
+  const play = useCallback((params?: playParams) => {
     if (!audioContextRef.current || !audioBufferRef.current) {
       return;
     }
 
+    const { volume } = { volume: 1, ...params };
+
     const source = audioContextRef.current.createBufferSource();
     source.buffer = audioBufferRef.current;
     source.connect(audioContextRef.current.destination);
+
+    const gainNode = audioContextRef.current.createGain();
+    gainNode.gain.value = volume;
+
+    source.connect(gainNode);
+    gainNode.connect(audioContextRef.current.destination);
 
     source.start();
   }, []);

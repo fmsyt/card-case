@@ -109,7 +109,7 @@ function CaseInner(props: CaseProps) {
       }
 
       playingRef.current = true;
-      play();
+      play({ volume: volumeRef.current });
     })();
 
     return () => {
@@ -129,7 +129,7 @@ function CaseInner(props: CaseProps) {
       }
 
       playingRef.current = true;
-      play();
+      play({ volume: volumeRef.current });
     })();
 
     return () => {

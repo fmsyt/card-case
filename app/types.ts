@@ -3,9 +3,13 @@ export type WindowWithAudioContext = typeof window & {
   webkitAudioContext: typeof AudioContext;
 };
 
+export type playParams = {
+  volume?: number;
+};
+
 export type SoundContextValue = {
   isNotSupported: boolean;
   initAudio: () => void;
-  play: () => void;
+  play: (params?: playParams) => void;
   getAudioContext: () => AudioContext | null;
 };
