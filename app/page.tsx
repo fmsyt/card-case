@@ -1,4 +1,6 @@
-import Case from "./components/Case";
+import dynamic from "next/dynamic";
+
+const Case = dynamic(() => import("./components/Case"), { ssr: false });
 
 export default function Home() {
   return (

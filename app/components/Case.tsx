@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import useLocalStorage from "use-local-storage";
 import SoundContext from "../SoundContext";
 import SoundProvider from "../SoundProvider";
 import Card from "./Card";
@@ -29,7 +30,7 @@ function CaseInner(props: CaseProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const inputImageRef = useRef<HTMLInputElement>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [image, setImage] = useLocalStorage<string | null>("image", null);
 
   const handleImageChange = useCallback(() => {
     if (!inputImageRef.current) {
@@ -43,11 +44,11 @@ function CaseInner(props: CaseProps) {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setImageBase64(event.target?.result as string);
+      setImage(event.target?.result as string);
     };
 
     reader.readAsDataURL(file);
-  }, []);
+  }, [setImage]);
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
 
@@ -315,7 +316,7 @@ function CaseInner(props: CaseProps) {
           onContextMenu={handleContextMenu}
           onDoubleClick={handleContextMenu}
         >
-          <Card direction={props.direction} imageBase64={imageBase64} />
+          <Card direction={props.direction} image={image} />
         </div>
       </div>
 
