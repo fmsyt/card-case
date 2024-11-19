@@ -25,6 +25,11 @@ export default function Case(props: CaseProps) {
   );
 }
 
+const defaultDirection =
+  localStorage.getItem("direction") ||
+  ("landscape" as "landscape" | "portrait");
+const defaultVolume = localStorage.getItem("volume") || 0.5;
+
 function CaseInner(props: CaseProps) {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -52,7 +57,7 @@ function CaseInner(props: CaseProps) {
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
 
-  const { direction = "landscape" } = props;
+  const { direction = defaultDirection } = props;
 
   const { initAudio, play } = useContext(SoundContext);
 
@@ -60,7 +65,7 @@ function CaseInner(props: CaseProps) {
   const [isHitTopOrBottom, setIsHitTopOrBottom] = useState(false);
 
   const [activated, setActivated] = useState(false);
-  const volumeRef = useRef(0.5);
+  const volumeRef = useRef(Number(defaultVolume));
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -306,7 +311,7 @@ function CaseInner(props: CaseProps) {
           borderColor,
           "rounded-[3mm]",
           "relative",
-          direction === "landscape" ? "landscape" : "portrait",
+          direction,
           !activated && "hidden",
         ].join(" ")}
       >
@@ -316,7 +321,10 @@ function CaseInner(props: CaseProps) {
           onContextMenu={handleContextMenu}
           onDoubleClick={handleContextMenu}
         >
-          <Card direction={props.direction} image={image} />
+          <Card
+            direction={direction as "landscape" | "portrait"}
+            image={image}
+          />
         </div>
       </div>
 
@@ -329,6 +337,7 @@ function CaseInner(props: CaseProps) {
           defaultValue={volumeRef.current}
           onChange={(e) => {
             volumeRef.current = Number(e.target.value);
+            localStorage.setItem("volume", String(volumeRef.current));
           }}
           className="mt-4"
         />
