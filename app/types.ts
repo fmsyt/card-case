@@ -3,6 +3,8 @@ export type WindowWithAudioContext = typeof window & {
   webkitAudioContext: typeof AudioContext;
 };
 
+export type Direction = "portrait" | "landscape";
+
 export type playParams = {
   volume?: number;
 };

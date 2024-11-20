@@ -11,26 +11,20 @@ import {
 import useLocalStorage from "use-local-storage";
 import SoundContext from "../SoundContext";
 import SoundProvider from "../SoundProvider";
+import type { Direction } from "../types";
 import Card from "./Card";
 
-type CaseProps = {
-  direction?: "landscape" | "portrait";
-};
-
-export default function Case(props: CaseProps) {
+export default function Case() {
   return (
     <SoundProvider>
-      <CaseInner {...props} />
+      <CaseInner />
     </SoundProvider>
   );
 }
 
-const defaultDirection =
-  localStorage.getItem("direction") ||
-  ("landscape" as "landscape" | "portrait");
 const defaultVolume = localStorage.getItem("volume") || 0.5;
 
-function CaseInner(props: CaseProps) {
+function CaseInner() {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -57,8 +51,6 @@ function CaseInner(props: CaseProps) {
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
 
-  const { direction = defaultDirection } = props;
-
   const { initAudio, play } = useContext(SoundContext);
 
   const [isHitLeftOrRight, setIsHitLeftOrRight] = useState(false);
@@ -66,10 +58,25 @@ function CaseInner(props: CaseProps) {
 
   const [activated, setActivated] = useState(false);
   const volumeRef = useRef(Number(defaultVolume));
-
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const playingRef = useRef(false);
+
+  const [direction, setDirection] = useState<Direction>("portrait");
+  useEffect(() => {
+    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    setDirection(isPortrait ? "portrait" : "landscape");
+
+    const fn = () => {
+      setDirection((prev) => {
+        return prev === "portrait" ? "landscape" : "portrait";
+      });
+    };
+
+    window.addEventListener("orientationchange", fn);
+    return () => {
+      window.removeEventListener("orientationchange", fn);
+    };
+  }, []);
 
   useEffect(() => {
     initAudio();
@@ -329,18 +336,20 @@ function CaseInner(props: CaseProps) {
       </div>
 
       {activated && (
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          defaultValue={volumeRef.current}
-          onChange={(e) => {
-            volumeRef.current = Number(e.target.value);
-            localStorage.setItem("volume", String(volumeRef.current));
-          }}
-          className="mt-4"
-        />
+        <div>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            defaultValue={volumeRef.current}
+            onChange={(e) => {
+              volumeRef.current = Number(e.target.value);
+              localStorage.setItem("volume", String(volumeRef.current));
+            }}
+            className="mt-4"
+          />
+        </div>
       )}
 
       {!activated && (
