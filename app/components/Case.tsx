@@ -309,7 +309,7 @@ function CaseInner() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center bg-slate-200/[.80] p-4">
       <div
         ref={caseRef}
         className={[
