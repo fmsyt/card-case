@@ -17,7 +17,7 @@ export default function Card(props: CardProps) {
         "card",
         direction === "landscape" ? "landscape" : "portrait",
         "border",
-        "border-red-500",
+        "border-gray-300",
         "rounded-[3mm]",
         "selection-none",
       ].join(" ")}
