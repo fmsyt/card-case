@@ -6,9 +6,16 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  --trump-width: 58mm;
-  --trump-height: 89mm;
-  --trump-round: 3mm;
+  --trump-width-unit: 58mm;
+  --trump-height-unit: 89mm;
+
+  --trump-round-unit: 3mm;
+
+  --zoom-rate: 1;
+
+  --trump-width: calc(var(--trump-width-unit) * var(--zoom-rate));
+  --trump-height: calc(var(--trump-height-unit) * var(--zoom-rate));
+  --trump-round: calc(var(--trump-round-unit) * var(--zoom-rate));
 }
 
 @media (prefers-color-scheme: dark) {
