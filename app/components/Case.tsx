@@ -183,8 +183,8 @@ function CaseInner() {
       const cardWidth = cardElement.offsetWidth;
       const cardHeight = cardElement.offsetHeight;
 
-      const caseWidth = caseElement.offsetWidth;
-      const caseHeight = caseElement.offsetHeight;
+      const caseWidth = caseElement.offsetWidth - 1;
+      const caseHeight = caseElement.offsetHeight - 1;
 
       const cardLeftExpected = clientX - initialCardPosition.current.left;
       const cardTopExpected = clientY - initialCardPosition.current.top;
