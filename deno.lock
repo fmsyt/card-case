@@ -1,6 +1,20 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@core/asyncutil@1.2": "1.2.0",
+    "jsr:@core/unknownutil@4.3": "4.3.0",
+    "jsr:@core/unknownutil@^4.3.0": "4.3.0",
+    "jsr:@denops/core@7": "7.0.1",
+    "jsr:@denops/std@7.4": "7.4.0",
+    "jsr:@shougo/ddu-vim@9.0.0": "9.0.0",
+    "jsr:@std/assert@^1.0.8": "1.0.8",
+    "jsr:@std/assert@~1.0.2": "1.0.8",
+    "jsr:@std/async@~1.0.1": "1.0.9",
+    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "jsr:@std/path@~1.0.2": "1.0.8",
+    "jsr:@std/semver@1": "1.0.3",
+    "jsr:@std/testing@1.0": "1.0.5",
+    "jsr:@std/ulid@1": "1.0.0",
     "npm:@biomejs/biome@^1.9.3": "1.9.3",
     "npm:@types/node@20": "20.16.11",
     "npm:@types/react-dom@18": "18.3.0",
@@ -13,6 +27,59 @@
     "npm:tailwindcss@^3.4.1": "3.4.13_postcss@8.4.47",
     "npm:typescript@5": "5.6.2",
     "npm:use-local-storage@3": "3.0.0_react@18.3.1"
+  },
+  "jsr": {
+    "@core/asyncutil@1.2.0": {
+      "integrity": "9967f15190c60df032c13f72ce5ac73d185c34f31c53dc918d8800025854c118"
+    },
+    "@core/unknownutil@4.3.0": {
+      "integrity": "538a3687ffa81028e91d148818047df219663d0da671d906cecd165581ae55cc"
+    },
+    "@denops/core@7.0.1": {
+      "integrity": "ede39eec60de6d5bf0fbc0337d3e420a9689cc48afea8c71752e6c0fb630bde0"
+    },
+    "@denops/std@7.4.0": {
+      "integrity": "6d7ae66af0286a440c14c0ba096b4336697bcd69e83e0fce21a41fb3dec10d65",
+      "dependencies": [
+        "jsr:@core/unknownutil@^4.3.0",
+        "jsr:@denops/core",
+        "jsr:@std/semver",
+        "jsr:@std/ulid"
+      ]
+    },
+    "@shougo/ddu-vim@9.0.0": {
+      "integrity": "3e3803cdb25f2864a25d517fb2b64e44811788bda6e2a682a08d2910bdc7b0ca",
+      "dependencies": [
+        "jsr:@denops/std"
+      ]
+    },
+    "@std/assert@1.0.8": {
+      "integrity": "ebe0bd7eb488ee39686f77003992f389a06c3da1bbd8022184804852b2fa641b",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/async@1.0.9": {
+      "integrity": "c6472fd0623b3f3daae023cdf7ca5535e1b721dfbf376562c0c12b3fb4867f91"
+    },
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    },
+    "@std/semver@1.0.3": {
+      "integrity": "7c139c6076a080eeaa4252c78b95ca5302818d7eafab0470d34cafd9930c13c8"
+    },
+    "@std/testing@1.0.5": {
+      "integrity": "6e693cbec94c81a1ad3df668685c7ba8e20742bb10305bc7137faa5cf16d2ec4",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.8"
+      ]
+    },
+    "@std/ulid@1.0.0": {
+      "integrity": "d41c3d27a907714413649fee864b7cde8d42ee68437d22b79d5de4f81d808780"
+    }
   },
   "npm": {
     "@alloc/quick-lru@5.2.0": {
