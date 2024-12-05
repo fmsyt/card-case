@@ -25,6 +25,8 @@ export default function Case() {
 const defaultVolume = localStorage.getItem("volume") || 0.5;
 
 function CaseInner() {
+
+  const caseWrapperRef = useRef<HTMLDivElement>(null);
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -309,7 +311,10 @@ function CaseInner() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center bg-slate-200/[.80] p-4">
+    <div
+      ref={caseWrapperRef}
+      className="flex flex-col items-center bg-slate-200/[.80] p-4"
+    >
       <div
         ref={caseRef}
         className={[
