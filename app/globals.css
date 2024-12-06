@@ -6,8 +6,8 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  --trump-width-unit: 58mm;
-  --trump-height-unit: 89mm;
+  --trump-width-unit: 58;
+  --trump-height-unit: 89;
 
   --trump-round-unit: 3mm;
 
@@ -35,8 +35,14 @@ body {
 
 @layer components {
   .card {
-    width: var(--trump-width);
-    height: var(--trump-height);
+    /* width: var(--trump-width); */
+    /* height: var(--trump-height); */
+
+    width: 300px;
+    height: auto;
+
+    aspect-ratio: var(--trump-width) / var(--trump-height);
+
     border-radius: var(--trump-round);
     background: var(--foreground);
     color: var(--background);
@@ -48,25 +54,27 @@ body {
     user-select: none;
 
     &.landscape {
-      width: var(--trump-height);
-      height: var(--trump-width);
+      aspect-ratio: var(--trump-height) / var(--trump-width);
     }
     &.portrait {
-      width: var(--trump-width);
-      height: var(--trump-height);
+      aspect-ratio: var(--trump-width) / var(--trump-height);
     }
   }
 
   .case {
     --case-offset: 5mm;
 
+    width: 320px;
+    height: auto;
+
+    aspect-ratio: var(--trump-width) / var(--trump-height);
+    border-radius: calc(var(--trump-round) + var(--case-offset));
+
     &.landscape {
-      width: calc(var(--trump-height) + var(--case-offset));
-      height: calc(var(--trump-width) + var(--case-offset));
+      aspect-ratio: var(--trump-height) / var(--trump-width);
     }
     &.portrait {
-      width: calc(var(--trump-width) + var(--case-offset));
-      height: calc(var(--trump-height) + var(--case-offset));
+      aspect-ratio: var(--trump-width) / var(--trump-height);
     }
   }
 }
