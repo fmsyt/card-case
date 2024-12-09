@@ -1,5 +1,6 @@
 "use client";
 
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import {
   useCallback,
   useContext,
@@ -8,14 +9,11 @@ import {
   useRef,
   useState,
 } from "react";
-import Modal from "react-modal";
 import useLocalStorage from "use-local-storage";
 import SoundContext from "../SoundContext";
 import SoundProvider from "../SoundProvider";
 import type { Direction } from "../types";
 import Card from "./Card";
-
-Modal.setAppElement("#__next");
 
 export default function Case() {
   return (
@@ -368,36 +366,44 @@ function CaseInner() {
         <track kind="captions" />
       </audio>
 
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        contentLabel="設定"
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        className="fixed inset-0 z-10"
       >
-        <h2>設定</h2>
-        <input
-          ref={inputImageRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        {activated && (
-          <div>
+        <div
+          className="fixed inset-0 flex w-screen items-center justify-center"
+        >
+
+          <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
+            <DialogTitle>設定</DialogTitle>
+
             <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              defaultValue={volumeRef.current}
-              onChange={(e) => {
-                volumeRef.current = Number(e.target.value);
-                localStorage.setItem("volume", String(volumeRef.current));
-              }}
-              className="mt-4"
+              ref={inputImageRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
             />
-          </div>
-        )}
-        <button type="button" onClick={() => setIsModalOpen(false)}>閉じる</button>
-      </Modal>
+            {activated && (
+              <div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  defaultValue={volumeRef.current}
+                  onChange={(e) => {
+                    volumeRef.current = Number(e.target.value);
+                    localStorage.setItem("volume", String(volumeRef.current));
+                  }}
+                  className="mt-4"
+                />
+              </div>
+            )}
+            <button type="button" onClick={() => setIsModalOpen(false)}>閉じる</button>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }
