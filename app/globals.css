@@ -80,7 +80,7 @@ body {
 }
 
 .board {
-  background-color: #cd853f;
+  background-color: #364263;
   background-image:
     linear-gradient(rgba(255,255,255,.5) 2px, transparent 2px),
     linear-gradient(90deg, rgba(255,255,255,.5) 2px, transparent 2px),

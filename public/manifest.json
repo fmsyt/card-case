@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "theme_color": "#cd853f",
-  "background_color": "#cd853f",
+  "theme_color": "#364263",
+  "background_color": "#364263",
   "icons": [
     {
       "purpose": "maskable",
