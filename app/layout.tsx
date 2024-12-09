@@ -16,6 +16,19 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "カードケース",
   description: "カードをケース内で動かし、そのカタカタ音を楽しみます。",
+  icons: [
+    {
+      rel: "icon",
+      url: "/icon512_rounded.png",
+      sizes: "512x512",
+    },
+    {
+      rel: "apple-touch-icon",
+      url: "/icon512_rounded.png",
+      sizes: "512x512",
+    },
+  ],
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -25,10 +38,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon512_rounded.png" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
