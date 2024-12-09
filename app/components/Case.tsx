@@ -8,11 +8,14 @@ import {
   useRef,
   useState,
 } from "react";
+import Modal from "react-modal";
 import useLocalStorage from "use-local-storage";
 import SoundContext from "../SoundContext";
 import SoundProvider from "../SoundProvider";
 import type { Direction } from "../types";
 import Card from "./Card";
+
+Modal.setAppElement("#__next");
 
 export default function Case() {
   return (
@@ -31,6 +34,7 @@ function CaseInner() {
 
   const inputImageRef = useRef<HTMLInputElement>(null);
   const [image, setImage] = useLocalStorage<string | null>("image", null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleImageChange = useCallback(() => {
     if (!inputImageRef.current) {
@@ -45,6 +49,7 @@ function CaseInner() {
     const reader = new FileReader();
     reader.onload = (event) => {
       setImage(event.target?.result as string);
+      setIsModalOpen(false);
     };
 
     reader.readAsDataURL(file);
@@ -306,7 +311,7 @@ function CaseInner() {
   }, [isHitLeftOrRight, isHitTopOrBottom]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
-    inputImageRef.current?.click();
+    setIsModalOpen(true);
   }, []);
 
   return (
@@ -339,23 +344,6 @@ function CaseInner() {
         </div>
       </div>
 
-      {activated && (
-        <div>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            defaultValue={volumeRef.current}
-            onChange={(e) => {
-              volumeRef.current = Number(e.target.value);
-              localStorage.setItem("volume", String(volumeRef.current));
-            }}
-            className="mt-4"
-          />
-        </div>
-      )}
-
       {!activated && (
         <>
           <button
@@ -380,13 +368,36 @@ function CaseInner() {
         <track kind="captions" />
       </audio>
 
-      <input
-        ref={inputImageRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageChange}
-      />
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        contentLabel="設定"
+      >
+        <h2>設定</h2>
+        <input
+          ref={inputImageRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+        {activated && (
+          <div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              defaultValue={volumeRef.current}
+              onChange={(e) => {
+                volumeRef.current = Number(e.target.value);
+                localStorage.setItem("volume", String(volumeRef.current));
+              }}
+              className="mt-4"
+            />
+          </div>
+        )}
+        <button type="button" onClick={() => setIsModalOpen(false)}>閉じる</button>
+      </Modal>
     </div>
   );
 }
