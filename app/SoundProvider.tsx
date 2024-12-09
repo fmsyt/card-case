@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import SoundContext from "./SoundContext";
 import type {
   playParams,
@@ -28,31 +28,33 @@ export default function SoundProvider(props: AudioProviderProps) {
 
   const [isNotSupported, setIsNotSupported] = useState(false);
 
+  const fetchSound = useCallback(async () => {
+    if (!audioContextRef.current) {
+      return;
+    }
+
+    const context = audioContextRef.current;
+
+    const response = await fetch("/sounds/hit.mp3");
+    const buffer = await response.arrayBuffer();
+
+    const data = await context.decodeAudioData(buffer);
+    audioBufferRef.current = data;
+  }, []);
+
   const initAudio = useCallback(() => {
     try {
       const context = initAudioContextInstance();
       audioContextRef.current = context;
+      fetchSound();
     } catch (error) {
       setIsNotSupported(true);
-      return;
     }
+  }, [fetchSound]);
 
-    const fetchSound = async () => {
-      if (!audioContextRef.current) {
-        return;
-      }
-
-      const context = audioContextRef.current;
-
-      const response = await fetch("/sounds/hit.mp3");
-      const buffer = await response.arrayBuffer();
-
-      const data = await context.decodeAudioData(buffer);
-      audioBufferRef.current = data;
-    };
-
-    fetchSound();
-  }, []);
+  useEffect(() => {
+    initAudio();
+  }, [initAudio]);
 
   const play = useCallback((params?: playParams) => {
     if (!audioContextRef.current || !audioBufferRef.current) {
