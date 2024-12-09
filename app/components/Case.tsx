@@ -25,7 +25,6 @@ export default function Case() {
 const defaultVolume = localStorage.getItem("volume") || 0.5;
 
 function CaseInner() {
-
   const caseWrapperRef = useRef<HTMLDivElement>(null);
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
