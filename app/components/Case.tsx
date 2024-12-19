@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import {
   useCallback,
   useContext,
@@ -31,6 +31,8 @@ function CaseInner() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const inputImageRef = useRef<HTMLInputElement>(null);
+  const inputUrlRef = useRef<HTMLInputElement>(null);
+
   const [image, setImage] = useLocalStorage<string | null>("image", null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -51,6 +53,62 @@ function CaseInner() {
     };
 
     reader.readAsDataURL(file);
+  }, [setImage]);
+
+
+  const [loading, setLoading] = useState(false);
+  const [loadingErrorMessage, setLoadingErrorMessage] = useState<string | null>(null);
+  const handleLoadUrl = useCallback(async () => {
+    if (!inputUrlRef.current) {
+      return;
+    }
+
+    setLoading(true);
+    setLoadingErrorMessage(null);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const response = await fetch(inputUrlRef.current.value, {
+      signal,
+    });
+
+    if (!response.ok) {
+      setLoading(false);
+      setLoadingErrorMessage("読み込みに失敗しました");
+      return;
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.startsWith("image/")) {
+      setLoading(false);
+      setLoadingErrorMessage("画像ではありません");
+      return;
+    }
+
+    const blob = await response.blob();
+    const reader = new FileReader();
+
+    setLoadingErrorMessage("tesuto");
+
+    reader.onload = (event) => {
+      try {
+        setImage(event.target?.result as string);
+        setIsModalOpen(false);
+      } catch (error) {
+        setLoadingErrorMessage("読み込みに失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    reader.readAsDataURL(blob);
+    inputUrlRef.current.value = "";
+
+    return () => {
+      controller.abort();
+    };
+
   }, [setImage]);
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
@@ -371,21 +429,52 @@ function CaseInner() {
         onClose={() => setIsModalOpen(false)}
         className="fixed inset-0 z-10"
       >
-        <div
-          className="fixed inset-0 flex w-screen items-center justify-center"
-        >
-
+        <div className="fixed inset-0 flex w-screen items-center justify-center">
           <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
             <DialogTitle>設定</DialogTitle>
 
-            <input
-              ref={inputImageRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <Disclosure>
+              <DisclosureButton>画像を選択</DisclosureButton>
+              <DisclosurePanel
+                transition
+                className="origin-top transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0"
+              >
+                <input
+                  ref={inputImageRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+
+                <div>または</div>
+
+                <div>
+                  <input
+                    type="url"
+                    ref={inputUrlRef}
+                    placeholder="URLを入力"
+                    className="w-full p-2 border"
+                  />
+
+                  {loading && <p>読み込み中...</p>}
+
+                  <p className="text-red-500">{loadingErrorMessage}</p>
+
+                  <button
+                    type="button"
+                    onClick={handleLoadUrl}
+                    disabled={loading}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                  >
+                    読み込む
+                  </button>
+                </div>
+              </DisclosurePanel>
+            </Disclosure>
+
             {activated && (
               <div>
+                <div>音量</div>
                 <input
                   type="range"
                   min="0"
@@ -400,7 +489,16 @@ function CaseInner() {
                 />
               </div>
             )}
-            <button type="button" onClick={() => setIsModalOpen(false)}>閉じる</button>
+
+            <div className="flex items-center justify-center">
+              <button
+                type="button"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={() => setIsModalOpen(false)}
+              >
+                閉じる
+              </button>
+            </div>
           </DialogPanel>
         </div>
       </Dialog>

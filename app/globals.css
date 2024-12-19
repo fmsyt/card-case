@@ -9,13 +9,19 @@
   --trump-width-unit: 58;
   --trump-height-unit: 89;
 
+  --pokemon-card-width-unit: 63;
+  --pokemon-card-height-unit: 88;
+
   --trump-round-unit: 3mm;
 
   --zoom-rate: 1;
 
-  --trump-width: calc(var(--trump-width-unit) * var(--zoom-rate));
+  /* --trump-width: calc(var(--trump-width-unit) * var(--zoom-rate));
   --trump-height: calc(var(--trump-height-unit) * var(--zoom-rate));
-  --trump-round: calc(var(--trump-round-unit) * var(--zoom-rate));
+  --trump-round: calc(var(--trump-round-unit) * var(--zoom-rate)); */
+
+  --trump-width: calc(var(--pokemon-card-width-unit) * var(--zoom-rate));
+  --trump-height: calc(var(--pokemon-card-height-unit) * var(--zoom-rate));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -30,6 +36,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 
   overflow: hidden;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+
+  width: 100%;
+  height: 100%;
 }
 
 @layer components {
