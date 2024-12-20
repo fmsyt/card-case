@@ -1,6 +1,5 @@
 "use client";
 
-import { Dialog, DialogPanel, DialogTitle, Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import {
   useCallback,
   useContext,
@@ -30,6 +29,8 @@ function CaseInner() {
   const caseRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   const inputImageRef = useRef<HTMLInputElement>(null);
   const inputUrlRef = useRef<HTMLInputElement>(null);
 
@@ -55,9 +56,10 @@ function CaseInner() {
     reader.readAsDataURL(file);
   }, [setImage]);
 
-
   const [loading, setLoading] = useState(false);
-  const [loadingErrorMessage, setLoadingErrorMessage] = useState<string | null>(null);
+  const [loadingErrorMessage, setLoadingErrorMessage] = useState<string | null>(
+    null,
+  );
   const handleLoadUrl = useCallback(async () => {
     if (!inputUrlRef.current) {
       return;
@@ -108,7 +110,6 @@ function CaseInner() {
     return () => {
       controller.abort();
     };
-
   }, [setImage]);
 
   const initialCardPosition = useRef({ left: 0, top: 0 });
@@ -367,7 +368,7 @@ function CaseInner() {
   }, [isHitLeftOrRight, isHitTopOrBottom]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
-    setIsModalOpen(true);
+    dialogRef.current?.showModal();
   }, []);
 
   return (
@@ -424,59 +425,54 @@ function CaseInner() {
         <track kind="captions" />
       </audio>
 
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        className="fixed inset-0 z-10"
-      >
-        <div className="fixed inset-0 flex w-screen items-center justify-center">
-          <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
-            <DialogTitle>設定</DialogTitle>
-
-            <Disclosure>
-              <DisclosureButton>画像を選択</DisclosureButton>
-              <DisclosurePanel
-                transition
-                className="origin-top transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0"
-              >
+      <dialog ref={dialogRef} className="modal">
+        <div className="modal-box">
+          <div className="flex flex-col gap-4">
+            <div className="collapse collapse-arrow bg-base-200">
+              <input type="checkbox" />
+              <div className="collapse-title text-xl font-medium">
+                画像の選択
+              </div>
+              <div className="collapse-content">
                 <input
                   ref={inputImageRef}
                   type="file"
                   accept="image/*"
+                  className="file-input file-input-bordered w-full"
                   onChange={handleImageChange}
                 />
 
-                <div>または</div>
+                <div className="divider">または</div>
 
-                <div>
+                <div className="join">
                   <input
                     type="url"
                     ref={inputUrlRef}
                     placeholder="URLを入力"
-                    className="w-full p-2 border"
+                    className="input input-bordered join-item"
                   />
-
-                  {loading && <p>読み込み中...</p>}
-
-                  <p className="text-red-500">{loadingErrorMessage}</p>
 
                   <button
                     type="button"
                     onClick={handleLoadUrl}
                     disabled={loading}
-                    className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                    className="btn btn-primary join-item"
                   >
                     読み込む
                   </button>
                 </div>
-              </DisclosurePanel>
-            </Disclosure>
 
-            {activated && (
-              <div>
-                <div>音量</div>
+                {loading && <p>読み込み中...</p>}
+                <p className="text-red-500">{loadingErrorMessage}</p>
+              </div>
+            </div>
+
+            <div className="collapse collapse-open border-base-300 bg-base-200 border">
+              <div className="collapse-title text-xl font-medium">音量</div>
+              <div className="collapse-content">
                 <input
                   type="range"
+                  className="range range-xs w-full mt-4"
                   min="0"
                   max="1"
                   step="0.01"
@@ -485,23 +481,20 @@ function CaseInner() {
                     volumeRef.current = Number(e.target.value);
                     localStorage.setItem("volume", String(volumeRef.current));
                   }}
-                  className="mt-4"
                 />
               </div>
-            )}
-
-            <div className="flex items-center justify-center">
-              <button
-                type="button"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={() => setIsModalOpen(false)}
-              >
-                閉じる
-              </button>
             </div>
-          </DialogPanel>
+
+            <div className="modal-action">
+              <form method="dialog">
+                <button type="submit" className="btn btn-primary">
+                  閉じる
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
-      </Dialog>
+      </dialog>
     </div>
   );
 }
