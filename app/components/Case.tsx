@@ -121,7 +121,6 @@ function CaseInner() {
 
   const [activated, setActivated] = useState(false);
   const volumeRef = useRef(Number(defaultVolume));
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const playingRef = useRef(false);
 
   const [direction, setDirection] = useState<Direction>("portrait");
@@ -407,7 +406,7 @@ function CaseInner() {
             type="button"
             className="bg-blue-500 text-white px-4 py-2 rounded"
             onClick={() => {
-              audioRef.current?.play();
+              // audioRef.current?.play();
               setActivated(true);
             }}
           >
@@ -419,11 +418,6 @@ function CaseInner() {
           </p>
         </>
       )}
-
-      <audio ref={audioRef}>
-        <source src="/sounds/hit.mp3" type="audio/mpeg" />
-        <track kind="captions" />
-      </audio>
 
       <dialog ref={dialogRef} className="modal">
         <div className="modal-box">
