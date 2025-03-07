@@ -1,4 +1,11 @@
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import SoundContext from "./SoundContext";
 import type {
   playParams,
@@ -22,66 +29,118 @@ function initAudioContextInstance() {
   throw new Error("AudioContext not supported");
 }
 
+type AudioResource = {
+  context: AudioContext;
+  gainNode: AudioNode;
+};
+
 export default function SoundProvider(props: AudioProviderProps) {
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioBufferRef = useRef<AudioBuffer | null>(null);
+  const [audioResource, setAudioResource] = useState<AudioResource | null>(
+    null,
+  );
+
+  const soundEffectBufferRef = useRef<AudioBuffer | null>(null);
+
+  const isInitialized = useMemo(() => Boolean(audioResource), [audioResource]);
+  const [isStreamStarted, setIsStreamStarted] = useState(false);
 
   const [isNotSupported, setIsNotSupported] = useState(false);
 
-  const fetchSound = useCallback(async () => {
-    if (!audioContextRef.current) {
-      return;
-    }
-
-    const context = audioContextRef.current;
-
+  const fetchSE = useCallback(async (context: AudioContext) => {
     const response = await fetch("/sounds/hit.mp3");
     const buffer = await response.arrayBuffer();
 
     const data = await context.decodeAudioData(buffer);
-    audioBufferRef.current = data;
+    soundEffectBufferRef.current = data;
   }, []);
 
   const initAudio = useCallback(() => {
     try {
       const context = initAudioContextInstance();
-      audioContextRef.current = context;
-      fetchSound();
+
+      const gainNode = context.createGain();
+      gainNode.connect(context.destination);
+
+      return { context, gainNode } as AudioResource;
     } catch (error) {
       setIsNotSupported(true);
     }
-  }, [fetchSound]);
+
+    return null;
+  }, []);
 
   useEffect(() => {
-    initAudio();
-  }, [initAudio]);
+    const resource = initAudio();
 
-  const play = useCallback((params?: playParams) => {
-    if (!audioContextRef.current || !audioBufferRef.current) {
+    if (resource) {
+      setAudioResource(resource);
+      fetchSE(resource.context);
+    }
+
+    return () => {
+      if (resource) {
+        resource.context.close();
+
+        setAudioResource(null);
+        setIsStreamStarted(false);
+      }
+    };
+  }, [initAudio, fetchSE]);
+
+  const playSilentAudio = useCallback(() => {
+    if (!audioResource) {
       return;
     }
 
-    const { volume } = { volume: 1, ...params };
+    const audioContext = audioResource.context;
+    const gainNode = audioResource.gainNode;
 
-    const source = audioContextRef.current.createBufferSource();
-    source.buffer = audioBufferRef.current;
-
-    const gainNode = audioContextRef.current.createGain();
-
-    // NOTE: 人間の聴覚は対数的な感じ方をするので、音量を対数的に変更する
-    gainNode.gain.value = Math.log10(volume + 1);
-
+    const buffer = audioContext.createBuffer(
+      1,
+      audioContext.sampleRate * 1,
+      audioContext.sampleRate,
+    );
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
     source.connect(gainNode);
-    gainNode.connect(audioContextRef.current.destination);
-
     source.start();
-  }, []);
+  }, [audioResource]);
+
+  const play = useCallback(
+    (params?: playParams) => {
+      if (!audioResource) {
+        return;
+      }
+
+      const { volume } = { volume: 1, ...params };
+      if (!isStreamStarted) {
+        playSilentAudio();
+        setIsStreamStarted(true);
+      }
+
+      const source = audioResource.context.createBufferSource();
+      source.buffer = soundEffectBufferRef.current;
+
+      const gainNode = audioResource.context.createGain();
+
+      // NOTE: 人間の聴覚は対数的な感じ方をするので、音量を対数的に変更する
+      gainNode.gain.value = Math.log10(volume + 1);
+
+      source.connect(gainNode);
+      gainNode.connect(audioResource.gainNode);
+
+      source.start();
+    },
+    [audioResource, playSilentAudio, isStreamStarted],
+  );
 
   const audioContextValue: SoundContextValue = {
+    isInitialized,
     isNotSupported,
     initAudio,
     play,
-    getAudioContext: () => audioContextRef.current,
+    getAudioContext: () => audioResource?.context || null,
   };
 
   return (

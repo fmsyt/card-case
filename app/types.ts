@@ -11,6 +11,7 @@ export type playParams = {
 
 export type SoundContextValue = {
   isNotSupported: boolean;
+  isInitialized: boolean;
   initAudio: () => void;
   play: (params?: playParams) => void;
   getAudioContext: () => AudioContext | null;

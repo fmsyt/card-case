@@ -3,6 +3,7 @@ import type { SoundContextValue } from "./types";
 
 const SoundContext = createContext<SoundContextValue>({
   isNotSupported: false,
+  isInitialized: false,
   initAudio: () => {},
   play: () => {},
   getAudioContext: () => null,
